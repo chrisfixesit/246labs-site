@@ -7,6 +7,13 @@ reviews:
   # Request changes for blocking findings; approve once they're resolved
   auto_approvals:
     enabled: true
+    # Lockfiles are excluded from review below, so a dependency-only change
+    # must never be auto-approved; it needs a human look.
+    overrides:
+      - paths:
+          - "**/package-lock.json"
+          - "**/.terraform.lock.hcl"
+        enabled: false
   high_level_summary: true
   poem: false
   review_status: true
