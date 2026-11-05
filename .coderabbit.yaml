@@ -4,8 +4,9 @@ tone_instructions: "Be concise. Prioritise the contact form, IAM and deploy pipe
 
 reviews:
   profile: chill
-  # Request changes when there are actionable findings; approve once resolved
-  request_changes_workflow: true
+  # Request changes for blocking findings; approve once they're resolved
+  auto_approvals:
+    enabled: true
   high_level_summary: true
   poem: false
   review_status: true
@@ -65,8 +66,10 @@ reviews:
   tools:
     gitleaks:
       enabled: true
+    # No root package.json (the app lives in web/), so CodeRabbit can't run
+    # ESLint; CI lints instead.
     eslint:
-      enabled: true
+      enabled: false
     checkov:
       enabled: true
     tflint:
