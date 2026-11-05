@@ -1,0 +1,86 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+tone_instructions: "Be concise. Prioritise the contact form, IAM and deploy pipeline over style nits."
+
+reviews:
+  profile: chill
+  # Request changes when there are actionable findings; approve once resolved
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_title_keywords:
+      - "[WIP]"
+      - "[skip review]"
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/.next/**"
+    - "!**/.terraform/**"
+    - "!**/.terraform.lock.hcl"
+    - "!**/*.tfstate*"
+    - "!**/package-lock.json"
+    - "!docs/superpowers/**"
+
+  path_instructions:
+    - path: "web/app/api/contact/**"
+      instructions: >
+        Public, unauthenticated endpoint that sends email through SES. Every request
+        must be validated with web/lib/contact-schema.ts (lengths included). Check
+        for email header injection from user input, spam or abuse protection, and
+        generic error responses. Don't log message bodies or email addresses.
+    - path: "web/**/*.{ts,tsx}"
+      instructions: >
+        Next.js App Router. Only NEXT_PUBLIC_* values may reach client components;
+        flag server secrets or SES settings in client code. Keep metadata, Open
+        Graph images, robots and the privacy page accurate when pages change, and
+        check accessibility (alt text, labels, heading order, link text).
+    - path: "infra/{iam-*,oidc}.tf"
+      instructions: >
+        The GitHub OIDC trust must stay scoped to this repo and the branches that
+        deploy; flag wildcards in the `sub` condition. The Amplify compute role
+        should only allow ses:SendEmail/SendRawEmail from the configured identity,
+        not ses:* or Resource "*".
+    - path: "infra/matomo/**"
+      instructions: >
+        Self-hosted Matomo on EC2. Keep IMDSv2 (http_tokens = "required"),
+        encrypted EBS, versioned and encrypted backups with the public access block,
+        and no SSH open to 0.0.0.0/0. Flag changes that would replace the instance or
+        data volume (analytics data loss) and secrets rendered into user-data.
+    - path: "infra/**/*.tf"
+      instructions: >
+        Flag IAM with wildcard Action or Resource, missing encryption, hardcoded
+        account IDs, and changes that would destroy or recreate stateful resources.
+    - path: ".github/workflows/**"
+      instructions: >
+        deploy.yml runs after CI via workflow_run: it must only deploy when CI
+        succeeded on main, not for PR runs. Flag unpinned third-party actions, broad
+        `permissions`, id-token: write where it isn't needed, and secrets echoed to
+        logs.
+
+  tools:
+    gitleaks:
+      enabled: true
+    eslint:
+      enabled: true
+    checkov:
+      enabled: true
+    tflint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    actionlint:
+      enabled: true
+    markdownlint:
+      enabled: false
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: global
