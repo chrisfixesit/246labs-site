@@ -7,6 +7,10 @@ reviews:
   # Request changes for blocking findings; approve once they're resolved
   auto_approvals:
     enabled: true
+    # Authors can't wave findings through with @coderabbitai approve/resolve
+    allow_author_approval: false
+    # Riskier PRs (see merge_risk_instructions) need a human approval
+    max_merge_risk: moderate
     # Lockfiles are excluded from review below, so a dependency-only change
     # must never be auto-approved; it needs a human look.
     overrides:
@@ -14,6 +18,11 @@ reviews:
           - "**/package-lock.json"
           - "**/.terraform.lock.hcl"
         enabled: false
+  merge_risk_instructions: >
+    High: the public contact route and contact-schema, OIDC and IAM files,
+    changes that replace the Matomo instance or data volume, and deploy.yml.
+    Moderate: other infra, Next.js config, metadata and robots. Low: page copy,
+    styling and docs.
   high_level_summary: true
   poem: false
   review_status: true
