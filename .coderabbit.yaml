@@ -51,6 +51,13 @@ reviews:
         must be validated with web/lib/contact-schema.ts (lengths included). Check
         for email header injection from user input, spam or abuse protection, and
         generic error responses. Don't log message bodies or email addresses.
+    - path: "web/lib/contact-schema.ts"
+      instructions: >
+        The only validation for the public contact endpoint. Flag weakened checks
+        on name, email, company or message, a removed or bypassed website
+        honeypot, and anything that lets CR/LF into values that can reach email
+        headers. Changes should come with updates to
+        web/tests/lib/contact-schema.test.ts.
     - path: "web/**/*.{ts,tsx}"
       instructions: >
         Next.js App Router. Only NEXT_PUBLIC_* values may reach client components;
