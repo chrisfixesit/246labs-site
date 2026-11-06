@@ -1,5 +1,5 @@
 output "deploy_role_arn" {
-  value       = aws_iam_role.deploy.arn
+  value       = "arn:aws:iam::687159379702:role/gha-246labs-deploy" # managed in tofu-or-not-tofu
   description = "Role ARN for the GitHub Actions AWS_DEPLOY_ROLE_ARN variable"
 }
 
