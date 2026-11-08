@@ -1,23 +1,31 @@
 # 246Labs Pipeline Infrastructure (OpenTofu)
 
 Provisions the AWS side of the site's CI/CD in account `687159379702`
-(profile `personal-246labs`): the GitHub OIDC provider, the `gha-246labs-deploy`
-role, and the Amplify SSR compute role (SES send). Terraform state lives in S3 +
+(profile `personal-246labs`): the GitHub OIDC provider and the Amplify SSR
+compute role (SES send). Terraform state lives in S3 +
 DynamoDB in the same account.
 
 The **Amplify app is created in the console** and connected to the private repo
 via the **AWS Amplify GitHub App** (no personal access token). Terraform does
-not manage the app; it scopes the deploy role to the app via `var.amplify_app_id`.
+not manage the app; it takes the app ID via `var.amplify_app_id`.
+
+The GitHub Actions deploy role `gha-246labs-deploy` is **not** in this stack. It
+lives in [chrisfixesit/tofu-or-not-tofu](https://github.com/chrisfixesit/tofu-or-not-tofu)
+(`accounts/246labs/github-deploy`); change it there.
 
 > Toolchain: this project uses **OpenTofu** (`tofu`), a drop-in for `terraform`.
 
 ## One-time prerequisites
 - `tofu` (OpenTofu), `aws` CLI (`personal-246labs`), repo pushed to GitHub.
 - No PAT required (the GitHub App handles the Amplify↔GitHub connection).
+- Order on a fresh account: apply this stack first (it creates the GitHub OIDC
+  provider), then apply `accounts/246labs/github-deploy` in tofu-or-not-tofu,
+  which creates `gha-246labs-deploy`. Check it exists with
+  `aws iam get-role --role-name gha-246labs-deploy --profile personal-246labs`.
 
 ## Step 1 — Create the Amplify app in the console (account 687159379702)
 Amplify → Create app → GitHub → **authorize the AWS Amplify GitHub App** and pick
-`christophercorbin/246labs-site` → branch `main`. Then set:
+`chrisfixesit/246labs-site` → branch `main`. Then set:
 - Platform: **WEB_COMPUTE** (Next.js SSR).
 - Branch `main`: **disable automatic builds** (GitHub Actions triggers releases).
 - Build settings: Amplify auto-detects the repo-root `amplify.yml` (monorepo `appRoot: web`).
@@ -37,12 +45,11 @@ tofu apply        # creates the S3 state bucket + DynamoDB lock table
 cd infra
 tofu init         # uses the S3 backend created above
 tofu apply \
-  -var "github_owner=christophercorbin" \
+  -var "github_owner=chrisfixesit" \
   -var "github_repo=246labs-site" \
   -var "amplify_app_id=<APP_ID_FROM_STEP_1>"
 ```
-This creates the OIDC provider, `gha-246labs-deploy` (scoped to this app's ARN),
-and the `amplify-246labs-compute` SES role.
+This creates the OIDC provider and the `amplify-246labs-compute` SES role.
 
 ## Step 4 — Attach the compute role to the app (SES runtime permission)
 ```bash
