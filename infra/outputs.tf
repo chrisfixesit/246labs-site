@@ -1,5 +1,10 @@
+# Read-only lookup: the role is managed in tofu-or-not-tofu.
+data "aws_iam_role" "deploy" {
+  name = "gha-246labs-deploy"
+}
+
 output "deploy_role_arn" {
-  value       = "arn:aws:iam::687159379702:role/gha-246labs-deploy" # managed in tofu-or-not-tofu
+  value       = data.aws_iam_role.deploy.arn
   description = "Role ARN for the GitHub Actions AWS_DEPLOY_ROLE_ARN variable"
 }
 
