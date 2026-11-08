@@ -18,8 +18,10 @@ lives in [chrisfixesit/tofu-or-not-tofu](https://github.com/chrisfixesit/tofu-or
 ## One-time prerequisites
 - `tofu` (OpenTofu), `aws` CLI (`personal-246labs`), repo pushed to GitHub.
 - No PAT required (the GitHub App handles the Amplify↔GitHub connection).
-- The deploy role `gha-246labs-deploy` already exists (applied from
-  tofu-or-not-tofu). `tofu output deploy_role_arn` reads it and fails if it's missing.
+- Order on a fresh account: apply this stack first (it creates the GitHub OIDC
+  provider), then apply `accounts/246labs/github-deploy` in tofu-or-not-tofu,
+  which creates `gha-246labs-deploy`. Check it exists with
+  `aws iam get-role --role-name gha-246labs-deploy --profile personal-246labs`.
 
 ## Step 1 — Create the Amplify app in the console (account 687159379702)
 Amplify → Create app → GitHub → **authorize the AWS Amplify GitHub App** and pick

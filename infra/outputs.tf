@@ -1,10 +1,6 @@
-# Read-only lookup: the role is managed in tofu-or-not-tofu.
-data "aws_iam_role" "deploy" {
-  name = "gha-246labs-deploy"
-}
-
 output "deploy_role_arn" {
-  value       = data.aws_iam_role.deploy.arn
+  # Built, not looked up: the role is created in tofu-or-not-tofu after this stack's OIDC provider.
+  value       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gha-246labs-deploy"
   description = "Role ARN for the GitHub Actions AWS_DEPLOY_ROLE_ARN variable"
 }
 
