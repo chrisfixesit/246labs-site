@@ -9,9 +9,10 @@ reviews:
     enabled: true
     # Authors can't wave findings through with @coderabbitai approve/resolve
     allow_author_approval: false
-    # Above this risk (see merge_risk_instructions) CodeRabbit withholds its
-    # approval. That is advisory, not a merge gate: whoever merges decides.
-    max_merge_risk: moderate
+    # One-person team, so CodeRabbit is the reviewer: approve up to high risk
+    # once findings are resolved. Critical PRs, and the paths in the overrides
+    # below, never get its approval and need a human.
+    max_merge_risk: high
     # Lockfiles are excluded from review below, so a dependency-only change
     # must never be auto-approved; it needs a human look.
     overrides:
@@ -66,8 +67,7 @@ reviews:
         check accessibility (alt text, labels, heading order, link text).
     - path: "infra/{iam-*,oidc}.tf"
       instructions: >
-        The GitHub OIDC trust must stay scoped to this repo and the branches that
-        deploy; flag wildcards in the `sub` condition. The Amplify compute role
+        This stack still owns the GitHub OIDC provider. The Amplify compute role
         should only allow ses:SendEmail/SendRawEmail from the configured identity,
         not ses:* or Resource "*".
     - path: "infra/matomo/**"
@@ -80,6 +80,9 @@ reviews:
       instructions: >
         Flag IAM with wildcard Action or Resource, missing encryption, hardcoded
         account IDs, and changes that would destroy or recreate stateful resources.
+        The deploy role (gha-246labs-deploy) moved to chrisfixesit/tofu-or-not-tofu
+        (accounts/246labs/github-deploy); flag any attempt to recreate it in any
+        file here.
     - path: ".github/workflows/**"
       instructions: >
         deploy.yml runs after CI via workflow_run: it must only deploy when CI
